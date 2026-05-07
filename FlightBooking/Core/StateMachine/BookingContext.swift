@@ -1,3 +1,11 @@
+//
+//  BookingContext.swift
+//  FlightBooking
+//
+//  Created by Aftab on 07/05/26.
+//
+
+
 // MARK: - Context
 
 struct BookingContext {

@@ -13,17 +13,5 @@ struct SearchQuery: Equatable {
     let to: String
 }
 
-struct Flight: Identifiable, Equatable {
-    let id: UUID
-    let name: String
-}
 
-struct Traveller: Identifiable, Equatable {
-    let id: UUID
-    let name: String
-}
 
-struct Booking: Equatable {
-    let id: UUID
-    let reference: String
-}

@@ -4,10 +4,10 @@
 //
 //  Created by Aftab on 07/05/26.
 //
-
+import Foundation
+import Observation
 
 // MARK: - Coordinator
-import Observation
 
 @MainActor
 @Observable
