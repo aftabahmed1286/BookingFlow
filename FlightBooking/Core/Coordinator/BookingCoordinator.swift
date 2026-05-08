@@ -89,21 +89,41 @@ final class BookingCoordinator {
             path = []
 
         case .flights:
-            path = [.flights]
+            path = [
+                .flights
+            ]
 
         case .flightDetail:
-            path = [.flights, .flightDetail]
+            path = [
+                .flights,
+                .flightDetail
+            ]
 
         case .traveller:
-            path = [.flights, .flightDetail,  .traveller]
+            path = [
+                .flights,
+                .flightDetail,
+                .traveller
+            ]
 
         case .processingPayment,
              .paymentError:
 
-            path = [.flights, .flightDetail,  .traveller, .payment]
+            path = [
+                .flights,
+                .flightDetail,
+                .traveller,
+                .payment
+            ]
 
         case .confirmation:
-            path = [.confirmation]
+            path = [
+                .flights,
+                .flightDetail,
+                .traveller,
+                .payment,
+                .confirmation
+            ]
 
         default:
             break
