@@ -9,10 +9,6 @@ import Observation
 
 // MARK: - Coordinator
 
-protocol FlightServiceProtocol {
-    func searchFlights( _ query: SearchQuery) async throws -> [Flight]
-    func processPayment( _ flight: Flight, _ travellers: [Traveller]) async throws -> Booking
-}
 
 @MainActor
 @Observable
