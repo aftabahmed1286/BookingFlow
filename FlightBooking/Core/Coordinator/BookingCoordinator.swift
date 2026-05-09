@@ -9,14 +9,17 @@ import Observation
 
 // MARK: - Coordinator
 
+protocol FlightServiceProtocol {
+    func searchFlights( _ query: SearchQuery) async throws -> [Flight]
+    func processPayment( _ flight: Flight, _ travellers: [Traveller]) async throws -> Booking
+}
+
 @MainActor
 @Observable
 final class BookingCoordinator {
 
     // MARK: Published
-
     var state: BookingState = .search
-
     var path: [Route] = [] {
         didSet {
             // If path becomes empty, ensure state is .search
@@ -28,56 +31,36 @@ final class BookingCoordinator {
     }
 
     // MARK: Context
-
     private(set) var context = BookingContext()
-
     // MARK: Private
-
     private let stateMachine = BookingStateMachine()
+
+    private let flightService: FlightServiceProtocol
+
+    init(flightService: FlightServiceProtocol) {
+        self.flightService = flightService
+    }
 
     // MARK: Public
 
     func send(_ action: BookingAction) {
 
-        capture(action)
-
-        let newState = stateMachine.transition(
+        let newState = stateMachine.reduce(
             state: state,
             action: action
         )
 
-        state = newState
-
-        updateRoute(for: newState)
-
-        handleEffects(action)
-    }
-
-    // MARK: Capture Context
-
-    private func capture(_ action: BookingAction) {
-
-        switch action {
-
-        case .searchTapped(let query):
-            context.query = query
-
-        case .searchSuccess(let flights):
-            context.flights = flights
-
-        case .flightSelected(let flight):
-            context.selectedFlight = flight
-
-        case .travellerSubmitted(let travellers):
-            context.travellers = travellers
-
-        case .paySuccess(let booking):
-            context.booking = booking
-
-        default:
-            break
+        if newState != state {
+            capture(action)
+            state = newState
+            updateRoute(for: newState)
+            handleEffects(action)
         }
     }
+}
+
+
+extension BookingCoordinator {
 
     // MARK: Navigation
 
@@ -129,6 +112,9 @@ final class BookingCoordinator {
             break
         }
     }
+}
+
+extension BookingCoordinator {
 
     // MARK: Effects
 
@@ -137,46 +123,57 @@ final class BookingCoordinator {
         switch action {
 
         case .searchTapped:
-            performFlightSearch()
-
+            Task {
+                guard let query = context.query,
+                      let flights = try? await flightService.searchFlights(query) else {
+                    return
+                }
+                send(.searchSuccess(flights))
+            }
         case .payTapped:
-            processPayment()
-
+            guard let flight = context.selectedFlight
+                     else {
+                return
+            }
+            let travellers = context.travellers
+            Task {
+                guard let booking = try? await flightService.processPayment(flight, travellers) else {
+                    return
+                }
+                send(.paySuccess(booking))
+            }
         default:
             break
         }
     }
 
-    // MARK: Mock APIs
+}
 
-    private func performFlightSearch() {
+extension BookingCoordinator {
 
-        Task {
+    // MARK: Capture Context
 
-            try? await Task.sleep(for: .seconds(1))
+    private func capture(_ action: BookingAction) {
 
-            let flights = [
-                Flight(id: UUID(), name: "Indigo"),
-                Flight(id: UUID(), name: "Air India"),
-                Flight(id: UUID(), name: "Emirates")
-            ]
+        switch action {
 
-            send(.searchSuccess(flights))
-        }
-    }
+        case .searchTapped(let query):
+            context.query = query
 
-    private func processPayment() {
+        case .searchSuccess(let flights):
+            context.flights = flights
 
-        Task {
+        case .flightSelected(let flight):
+            context.selectedFlight = flight
 
-            try? await Task.sleep(for: .seconds(2))
+        case .travellerSubmitted(let travellers):
+            context.travellers = travellers
 
-            let booking = Booking(
-                id: UUID(),
-                reference: "AERO123"
-            )
+        case .paySuccess(let booking):
+            context.booking = booking
 
-            send(.paySuccess(booking))
+        default:
+            break
         }
     }
 }
