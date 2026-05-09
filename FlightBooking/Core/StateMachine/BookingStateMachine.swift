@@ -8,9 +8,18 @@
 
 // MARK: - State Machine
 
-struct BookingStateMachine {
+protocol BookingStateReducer {
 
-    func transition(
+    func reduce(
+        state: BookingState,
+        action: BookingAction
+    ) -> BookingState
+
+}
+
+struct BookingStateMachine: BookingStateReducer {
+
+    func reduce(
         state: BookingState,
         action: BookingAction
     ) -> BookingState {
