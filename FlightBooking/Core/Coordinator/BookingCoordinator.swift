@@ -18,11 +18,7 @@ final class BookingCoordinator {
     var state: BookingState = .search
     var path: [Route] = [] {
         didSet {
-            // If path becomes empty, ensure state is .search
-            if path.isEmpty && state != .search {
-                state = .search
-            }
-            // Add more sync logic here if needed
+            updateState(for: path)
         }
     }
 
@@ -107,6 +103,27 @@ extension BookingCoordinator {
         default:
             break
         }
+    }
+
+    private func updateState(for path: [Route]) {
+
+        switch path.last {
+
+        case nil:
+            state = .search
+        case .flights:
+            state = .flights
+        case .flightDetail:
+            state = .flightDetail
+        case .traveller:
+            state = .traveller
+        case .payment:
+            state = .processingPayment
+        case .confirmation:
+            state = .confirmation
+
+        }
+
     }
 }
 
