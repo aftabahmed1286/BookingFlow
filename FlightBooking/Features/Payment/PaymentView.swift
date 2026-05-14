@@ -11,7 +11,7 @@ import SwiftUI
 
 struct PaymentView: View {
 
-    @Environment(BookingCoordinator.self) var coordinator
+    @Environment(Coordinator.self) var coordinator
 
     var body: some View {
 

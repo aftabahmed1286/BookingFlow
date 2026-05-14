@@ -10,15 +10,26 @@ import SwiftUI
 
 struct BookingRootView: View {
 
-    @State private var coordinator = BookingCoordinator(flightService: MockFlightService())
+    @State private var bookingCoordinator = Coordinator(
+        reducer: BookingStateMachine(),
+        flightService: MockFlightService()
+    )
 
     var body: some View {
 
-        NavigationStack(path: $coordinator.path) {
+        NavigationStack(path:
+                            // $bookingCoordinator.path
+                        Binding(
+                            get: { bookingCoordinator.path },
+                            set: { newPath in
+                                bookingCoordinator.didNavigate(to: newPath)
+                            }
+                        )
+        ) {
 
             SearchView()
                 .navigationBarBackButtonHidden(
-                    !coordinator.state.allowsBackNavigation
+                    !bookingCoordinator.state.allowsBackNavigation
                 )
                 .navigationDestination(for: Route.self) { route in
 
@@ -41,6 +52,6 @@ struct BookingRootView: View {
                     }
                 }
         }
-        .environment(coordinator)
+        .environment(bookingCoordinator)
     }
 }

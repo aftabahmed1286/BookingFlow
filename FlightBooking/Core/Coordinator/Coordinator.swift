@@ -12,24 +12,24 @@ import Observation
 
 @MainActor
 @Observable
-final class BookingCoordinator {
+final class Coordinator {
 
     // MARK: Published
     var state: BookingState = .search
-    var path: [Route] = [] {
-        didSet {
-            updateState(for: path)
-        }
-    }
+    var path: [Route] = []
 
     // MARK: Context
     private(set) var context = BookingContext()
     // MARK: Private
-    private let stateMachine = BookingStateMachine()
+    private let reducer: BookingStateReducer
 
     private let flightService: FlightServiceProtocol
 
-    init(flightService: FlightServiceProtocol) {
+    init(
+        reducer: BookingStateReducer,
+        flightService: FlightServiceProtocol
+    ) {
+        self.reducer = reducer
         self.flightService = flightService
     }
 
@@ -37,7 +37,7 @@ final class BookingCoordinator {
 
     func send(_ action: BookingAction) {
 
-        let newState = stateMachine.reduce(
+        let newState = reducer.reduce(
             state: state,
             action: action
         )
@@ -45,89 +45,20 @@ final class BookingCoordinator {
         if newState != state {
             capture(action)
             state = newState
-            updateRoute(for: newState)
+            path = state.routes
             handleEffects(action)
         }
     }
-}
 
+    func didNavigate(to path: [Route]) {
 
-extension BookingCoordinator {
-
-    // MARK: Navigation
-
-    private func updateRoute(for state: BookingState) {
-
-        switch state {
-
-        case .search:
-            path = []
-
-        case .flights:
-            path = [
-                .flights
-            ]
-
-        case .flightDetail:
-            path = [
-                .flights,
-                .flightDetail
-            ]
-
-        case .traveller:
-            path = [
-                .flights,
-                .flightDetail,
-                .traveller
-            ]
-
-        case .processingPayment,
-             .paymentError:
-
-            path = [
-                .flights,
-                .flightDetail,
-                .traveller,
-                .payment
-            ]
-
-        case .confirmation:
-            path = [
-                .flights,
-                .flightDetail,
-                .traveller,
-                .payment,
-                .confirmation
-            ]
-
-        default:
-            break
-        }
-    }
-
-    private func updateState(for path: [Route]) {
-
-        switch path.last {
-
-        case nil:
-            state = .search
-        case .flights:
-            state = .flights
-        case .flightDetail:
-            state = .flightDetail
-        case .traveller:
-            state = .traveller
-        case .payment:
-            state = .processingPayment
-        case .confirmation:
-            state = .confirmation
-
-        }
+        self.path = path
+        self.state = BookingState(path: path)
 
     }
 }
 
-extension BookingCoordinator {
+extension Coordinator {
 
     // MARK: Effects
 
@@ -162,7 +93,7 @@ extension BookingCoordinator {
 
 }
 
-extension BookingCoordinator {
+extension Coordinator {
 
     // MARK: Capture Context
 
