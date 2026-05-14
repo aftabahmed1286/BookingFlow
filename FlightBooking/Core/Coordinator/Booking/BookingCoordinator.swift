@@ -9,28 +9,27 @@ import Observation
 
 // MARK: - Coordinator
 
-
 @MainActor
 @Observable
 final class BookingCoordinator {
 
-    // MARK: Published
-    var state: BookingState = .search
-    var path: [Route] = []
+    // MARK: Initial Setup
+    private(set) var state: BookingState = .search
+    private(set) var path: [BookingRoute] = []
 
     // MARK: Context
     private(set) var context = BookingContext()
+
     // MARK: Private
     private let reducer: BookingStateReducer
-
-    private let flightService: FlightServiceProtocol
+    private let bookingService: BookingServiceProtocol
 
     init(
         reducer: BookingStateReducer,
-        flightService: FlightServiceProtocol
+        flightService: BookingServiceProtocol
     ) {
         self.reducer = reducer
-        self.flightService = flightService
+        self.bookingService = flightService
     }
 
     // MARK: Public
@@ -45,16 +44,22 @@ final class BookingCoordinator {
         if newState != state {
             capture(action)
             state = newState
-            path = state.routes
+//            path = state.routes
+
+            if self.path != state.routes {
+                self.path = state.routes
+            }
+
             handleEffects(action)
         }
     }
 
-    func didNavigate(to path: [Route]) {
-
+    func didNavigate(to path: [BookingRoute]) {
+        guard self.path != path else {
+            return
+        }
         self.path = path
         self.state = BookingState(path: path)
-
     }
 }
 
@@ -69,7 +74,7 @@ extension BookingCoordinator {
         case .searchTapped:
             Task {
                 guard let query = context.query,
-                      let flights = try? await flightService.searchFlights(query) else {
+                      let flights = try? await bookingService.searchFlights(query) else {
                     return
                 }
                 send(.searchSuccess(flights))
@@ -81,7 +86,7 @@ extension BookingCoordinator {
             }
             let travellers = context.travellers
             Task {
-                guard let booking = try? await flightService.processPayment(flight, travellers) else {
+                guard let booking = try? await bookingService.processPayment(flight, travellers) else {
                     return
                 }
                 send(.paySuccess(booking))
