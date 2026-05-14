@@ -12,7 +12,7 @@ import Observation
 
 @MainActor
 @Observable
-final class Coordinator {
+final class BookingCoordinator {
 
     // MARK: Published
     var state: BookingState = .search
@@ -58,7 +58,7 @@ final class Coordinator {
     }
 }
 
-extension Coordinator {
+extension BookingCoordinator {
 
     // MARK: Effects
 
@@ -93,7 +93,7 @@ extension Coordinator {
 
 }
 
-extension Coordinator {
+extension BookingCoordinator {
 
     // MARK: Capture Context
 

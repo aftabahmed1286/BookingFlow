@@ -11,7 +11,7 @@ import SwiftUI
 
 struct FlightDetailView: View {
 
-    @Environment(Coordinator.self) var coordinator
+    @Environment(BookingCoordinator.self) var coordinator
 
     var body: some View {
 

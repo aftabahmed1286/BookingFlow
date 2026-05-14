@@ -10,7 +10,7 @@ import SwiftUI
 
 struct BookingRootView: View {
 
-    @State private var bookingCoordinator = Coordinator(
+    @State private var bookingCoordinator = BookingCoordinator(
         reducer: BookingStateMachine(),
         flightService: MockFlightService()
     )
