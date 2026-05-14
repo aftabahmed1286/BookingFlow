@@ -27,7 +27,7 @@ enum BookingState: Equatable {
 extension BookingState {
 
     //Routes
-    var routes: [Route] {
+    var routes: [BookingRoute] {
         switch self {
         case .search, .loadingSearch, .searchError:
             return []
@@ -68,7 +68,7 @@ extension BookingState {
 
 extension BookingState {
 
-    init(path: [Route]) {
+    init(path: [BookingRoute]) {
 
         switch path.last {
 

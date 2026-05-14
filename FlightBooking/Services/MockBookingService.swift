@@ -8,7 +8,7 @@ import Foundation
 
 // MARK: - Mock
 
-class MockFlightService: FlightServiceProtocol  {
+class MockBookingService: BookingServiceProtocol  {
 
     func searchFlights(_ query: SearchQuery) async throws -> [Flight] {
 

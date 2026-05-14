@@ -8,7 +8,7 @@
 
 // MARK: - Route
 
-enum Route: Hashable {
+enum BookingRoute: Hashable {
 
     case flights
     case flightDetail

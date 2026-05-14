@@ -12,7 +12,7 @@ struct BookingRootView: View {
 
     @State private var bookingCoordinator = BookingCoordinator(
         reducer: BookingStateMachine(),
-        flightService: MockFlightService()
+        flightService: MockBookingService()
     )
 
     var body: some View {
@@ -31,7 +31,7 @@ struct BookingRootView: View {
                 .navigationBarBackButtonHidden(
                     !bookingCoordinator.state.allowsBackNavigation
                 )
-                .navigationDestination(for: Route.self) { route in
+                .navigationDestination(for: BookingRoute.self) { route in
 
                     switch route {
 
